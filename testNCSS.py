@@ -1,4 +1,4 @@
-﻿from netCDF4 import Dataset
+﻿﻿from netCDF4 import Dataset
 
 class NotAnNCFileError(Exception):
 

@@ -1,4 +1,4 @@
-﻿import testNCSS as ncss
+﻿﻿import testNCSS as ncss
 from string import join
 import datetime as dt
 
