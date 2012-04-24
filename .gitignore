@@ -4,3 +4,6 @@ __git_version__.py
 *.pyc
 dist/*
 build/*
+.idea/
+data_tmp/
+projectFilesBackup/
