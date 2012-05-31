@@ -16,7 +16,8 @@ def get_init_time():
         dtfmt = '%Y-%m-%dT%H:%M:%SZ'
         return dt.datetime.fromtimestamp(time.mktime(time.strptime(dtstr, dtfmt)))
     else:
-        filename = uh.get_data_url(service = service).split('/')[-1].split('_')
+        filename = uh.get_data_url().split('/')[-1].split('_')
+        #filename = uh.get_data_url(service = service).split('/')[-1].split('_')
         # ['NAM', 'CONUS', '80km', '20120210', '0000.grib1']
         datestr = filename[-2]
         timestr = filename[-1].split('.')[0]

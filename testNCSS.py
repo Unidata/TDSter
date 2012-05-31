@@ -151,8 +151,10 @@ def get_ncss_data(basic_ncss_request='', dataset = 'NCEP_NAM_CONUS_80km', age = 
 
     full_url = join([base_url,ncss_request],'')
     # Request the data and store them in a tmp file
+    url_request = urllib2.Request(full_url)
+    url_request.add_header('User-agent', 'pyTDSter')
     try:
-        response = urllib2.urlopen(full_url)
+        response = urllib2.urlopen(url_request)
     except IOError, e:
         if hasattr(e, 'reason'):
             print 'We failed to reach a server.'
@@ -200,7 +202,7 @@ def get_ncss_data(basic_ncss_request='', dataset = 'NCEP_NAM_CONUS_80km', age = 
 def test_ncss_var():
     # Request data via ncss
     var = 'Temperature_height_above_ground'
-    basic_ncss_request = "?var={}".format(var)
+    basic_ncss_request = "?var={}&temporal=all".format(var)
     ncss = get_ncss_data(basic_ncss_request = basic_ncss_request, service = 'ncss')
     # get data via opendap
     odap_data = get_odap_data([var,])
@@ -211,7 +213,7 @@ def test_ncss_var():
 def test_ncss_var_specify_return_netcdf():
     # Request data via ncss
     var = 'Temperature_height_above_ground'
-    basic_ncss_request = "?var={}".format(var)
+    basic_ncss_request = "?var={}&temporal=all".format(var)
     ncss = get_ncss_data(basic_ncss_request = basic_ncss_request, service = 'ncss', return_file_type = 'netcdf')
     # get data via opendap
     odap_data = get_odap_data([var,])
@@ -234,12 +236,13 @@ def test_ncss_var_specify_return_xml():
     basic_ncss_request = "?var={}".format(var)
     ncss = get_ncss_data(basic_ncss_request = basic_ncss_request, service = 'ncss', return_file_type = 'xml')
     ncss.remove_return_file()
+
 #
 # We expect this to fail with the AssertionError, so we use the
 # @raises decorator of nose to say "it's cool, we know and, right now,
 # expect this to happen"
 #
-@raises(AssertionError)
+@raises(NotAnNcFileError)
 def test_ncss_var_lat_lon():
     # Request data via ncss
     var = 'Temperature_height_above_ground'
@@ -254,14 +257,14 @@ def test_ncss_var_lat_lon():
     ncss.check_subset_basic(odap_data, var)
     ncss.remove_return_file()
 
-def test_ncss_var_bounding_box():
+def test_ncss_var_lat_lon_bounding_box():
     # Request data via ncss
     var = 'Temperature_height_above_ground'
     lat = 40
     lon = -104
     delta = 2.3
     ncss = get_ncss_data(basic_ncss_request =
-    "?var={}&spatial=bb&north={}&west={}&east={}&south={}".format(var,
+    "?var={}&north={}&west={}&east={}&south={}".format(var,
         lat + delta,
         lon - delta,
         lon + delta,
@@ -274,16 +277,58 @@ def test_ncss_var_bounding_box():
     ncss.check_subset_basic(odap_data, var)
     ncss.remove_return_file()
 
+def test_ncss_var_coordinate_bounding_box():
+    # Request data via ncss
+    var = 'Temperature_height_above_ground'
+    minx=-10
+    maxx=10
+    miny=-4015
+    maxy=-4000
+    ncss = get_ncss_data(basic_ncss_request =
+    "?var={}&minx={}&miny={}&maxx={}&maxy={}".format(var,
+        minx,
+        miny,
+        maxx,
+        maxy),
+        service = 'ncss', dataset='NCEP_DGEX_AK_12km')
+    # get data via opendap
+    #odap_data = get_odap_data([var,])
+    # Check if subsetting done (shapes should be different) Note: this
+    #  does not check if subsetting done correctly!
+    #ncss.check_subset_basic(odap_data, var)
+    ncss.remove_return_file()
+
+def test_ncss_var_all_spatial_subset():
+    # Request data via ncss
+    var = 'all'
+    lat = 40
+    lon = -104
+    delta = 2.3
+    ncss = get_ncss_data(basic_ncss_request =
+    "?var={}&north={}&west={}&east={}&south={}".format(var,
+        lat + delta,
+        lon - delta,
+        lon + delta,
+        lat - delta),
+        service = 'ncss')
+    # get data via opendap
+    #odap_data = get_odap_data([var1,var2])
+    # Check if subsetting done (shapes should be different) Note: this
+    #  does not check if subsetting done correctly!
+    #ncss.check_subset_basic(odap_data, var1)
+    #ncss.check_subset_basic(odap_data, var2)
+    ncss.remove_return_file()
+
 def test_ncss_dub_var_bounding_box():
     # Request data via ncss
     var1 = 'Temperature_height_above_ground'
-    var2 = 'Pressure_reduced_to_MSL'
+    var2 = 'Relative_humidity_height_above_ground'
     var = join([var1,var2],',')
     lat = 40
     lon = -104
     delta = 2.3
     ncss = get_ncss_data(basic_ncss_request =
-    "?var={}&spatial=bb&north={}&west={}&east={}&south={}".format(var,
+    "?var={}&north={}&west={}&east={}&south={}".format(var,
         lat + delta,
         lon - delta,
         lon + delta,
@@ -311,7 +356,7 @@ def test_ncss_var_single_time():
     #  does not check if subsetting done correctly!
     ncss.check_subset_basic(odap_data, var)
     # Check if subsetting is done correctly!
-    ncss.check_against_odap(odap_data, var, odap_subset = '0,:,:,:')
+    ncss.check_against_odap(odap_data, var, odap_subset = '0,:')
     ncss.remove_return_file()
 
 def test_ncss_var_single_time_present():
@@ -346,7 +391,7 @@ def test_ncss_var_time_range():
     #  does not check if subsetting done correctly!
     ncss.check_subset_basic(odap_data, var)
     # Check if subsetting is done correctly!
-    ncss.check_against_odap(odap_data, var, odap_subset = '0:{},:,:'.format(time_index+1))
+    ncss.check_against_odap(odap_data, var, odap_subset = '0:{},:'.format(time_index+1))
     ncss.remove_return_file()
 
 def test_ncss_var_time_duration_after_present():
@@ -378,13 +423,27 @@ def test_ncss_var_time_duration_before_present():
     ncss.check_subset_basic(odap_data, var)
     ncss.remove_return_file()
 
+@raises(HTTPError)
+def test_ncss_file_size_limit():
+    #
+    # Should fail as this is over the MaxFileDownloadSize Limit
+    #
+    # Request data via ncss
+    var = join(['Dew-point_temperature_height_above_ground',
+                'Relative_humidity_height_above_ground',
+                'Temperature_height_above_ground'],',')
+    ncss = get_ncss_data(basic_ncss_request =
+        "?var={}&temporal=all".format(var),
+        service='ncss', dataset='NCEP_NAM_CONUS_12km')
+    # get data via opendap
+    ncss.remove_return_file()
+
 ####################################################
 # NetCDF Subset Service for Grid as Point Datasets #
 ####################################################
 
-@raises(HTTPError)
 def test_ncss_gasp_var_netCDF():
-# Request data via ncss
+    # Request data via ncss
     var = 'Temperature_height_above_ground'
     basic_ncss_request = "?var={}".format(var)
     ncss = get_ncss_data(basic_ncss_request = basic_ncss_request, service = 'ncss', kind='grid_as_point',
@@ -427,7 +486,6 @@ def test_ncss_var_single_time_netCDF():
     #ncss.check_against_odap(odap_data, var, odap_subset = ':,{},{}'.format(time_index+1))
     ncss.remove_return_file()
 
-
 def test_ncss_var_single_time_present_netCDF():
     # Request data via ncss
     var = 'Temperature_height_above_ground'
@@ -444,3 +502,8 @@ def test_ncss_var_single_time_present_netCDF():
     # ToDo: Check if subsetting is done correctly!
     #ncss.check_against_odap(odap_data, var, odap_subset = ':,{},{}'.format(time_index+1))
     ncss.remove_return_file()
+
+############################
+# TDS Service Sanity Check #
+############################
+
