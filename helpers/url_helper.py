@@ -10,7 +10,10 @@ def strip_date(x):
 def url_service_transform(url, from_service = None, to_service = None):
     service_id = {'ncss' : '/ncss/grid/',
                   'odap' : '/dodsC/',
-                  'catalog' : '/catalog/'
+                  'catalog' : '/catalog/',
+                  'cdmremote' : '/cdmremote/',
+                  'ncml' : '/ncml/',
+                  'http' : '/fileServer/'
                  }
     if (from_service is not None) and (to_service is not None):
         return url.replace(service_id[from_service], service_id[to_service])

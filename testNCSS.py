@@ -159,6 +159,7 @@ def get_ncss_data(basic_ncss_request='', dataset = 'NCEP_NAM_CONUS_80km', age = 
         if hasattr(e, 'reason'):
             print 'We failed to reach a server.'
             print 'Reason: {}'.format(e.reason)
+            print 'Full  url: {}'.format(full_url)
             raise
         elif hasattr(e, 'code'):
             print 'The server couldn\'t fulfill the request.'
