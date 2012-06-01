@@ -7,8 +7,6 @@
 
     tds_tests = ["serviceSanityTest", "testNCSS"]
     for tds_test in tds_tests:
-        print('')
-        print('Running {} tests'.format(tds_test))
         os.system('nosetests {}.py --verbosity={} --nologcapture'.format(tds_test,verbosity))
 
 if __name__ == '__main__':
