@@ -1,8 +1,6 @@
 from string import join
-from helpers import get_data_url, url_service_transform
+from helpers import get_data_url, url_service_transform, basic_http_request
 import urllib2
-
-
 
 def test_cdmremote():
     cdmremote_url = get_data_url(service = 'cdmremote')

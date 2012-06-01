@@ -60,7 +60,7 @@ class NcssData(object):
         #
         remove(self.return_file)
 
-    def check_against_odap(self, odap_data, var, squeeze = True, odap_subset = None):
+    def check_against_odap(self, odap_data, var, squeeze = False, odap_subset = None):
         odap_data_ = odap_data[var][var][:]
         if odap_subset is not None:
             odap_data_ = eval('odap_data_[{}]'.format(odap_subset))
