@@ -9,7 +9,8 @@ def basic_http_request(full_url, return_response = False):
         response = urllib2.urlopen(url_request)
         if return_response:
             return response
-        del response
+        else:
+            del response
     except IOError, e:
         if hasattr(e, 'reason'):
             print 'We failed to reach a server.'

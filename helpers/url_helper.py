@@ -13,7 +13,9 @@ def url_service_transform(url, from_service = None, to_service = None):
                   'catalog' : '/catalog/',
                   'cdmremote' : '/cdmremote/',
                   'ncml' : '/ncml/',
-                  'http' : '/fileServer/'
+                  'http' : '/fileServer/',
+                  'wms' : '/wms/',
+                  'wcs' : '/wcs/'
                  }
     if (from_service is not None) and (to_service is not None):
         return url.replace(service_id[from_service], service_id[to_service])
