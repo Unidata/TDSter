@@ -1,8 +1,8 @@
 ﻿def run_ncss_tests():
     import os
     # check for tmp data dir for NCSS tests
-    tmp_data_dir = '.data_tmp/'
-    if !os.path.exists(tmp_data):
+    tmp_data_dir = 'data_tmp/'
+    if not os.path.exists(tmp_data_dir):
         os.mkdir(tmp_data_dir)
 
     os.system('nosetests testNCSS.py --verbosity=1 --nologcapture')
