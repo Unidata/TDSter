@@ -1,4 +1,7 @@
+from http_helper import get_user_agent
+
 __all__ = ['strip_date', 'get_data_url', 'url_service_transform']
+
 
 def strip_date(x):
     '''
@@ -8,15 +11,23 @@ def strip_date(x):
     return -999
 
 def url_service_transform(url, from_service = None, to_service = None):
+    from string import join
+    from TDSterErrors import NotAValidService
     service_id = {'ncss' : '/ncss/grid/',
                   'odap' : '/dodsC/',
                   'catalog' : '/catalog/',
                   'cdmremote' : '/cdmremote/',
-                  'ncml' : '/ncml/',
                   'http' : '/fileServer/',
                   'wms' : '/wms/',
-                  'wcs' : '/wcs/'
+                  'wcs' : '/wcs/',
+                  'iso' : '/iso/',
+                  'uddc' : '/uddc/',
+                  'ncml' : '/ncml/'
                  }
+    if (to_service is None) or (to_service not in service_id.keys()):
+        valid_services = service_id.keys()
+        raise NotAValidService(valid_services, to_service)
+
     if (from_service is not None) and (to_service is not None):
         return url.replace(service_id[from_service], service_id[to_service])
     elif (from_service is None):
@@ -62,7 +73,11 @@ def get_data_url(dataset = 'NCEP_NAM_CONUS_80km', age = 'latest', service = 'ncs
 
     links_to_data_url = top_level_data_urls[dataset]
 
-    ava_data = urllib2.urlopen(links_to_data_url)
+    url_request = urllib2.Request(links_to_data_url)
+    url_request.add_header('User-agent', get_user_agent())
+
+    ava_data = urllib2.urlopen(url_request)
+
     # collect all links on the page
     data_links = []
     for line in ava_data:

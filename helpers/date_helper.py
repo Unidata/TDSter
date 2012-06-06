@@ -1,11 +1,16 @@
-﻿import url_helper as uh
-from string import join
-import datetime as dt
+﻿import datetime as dt
+import pydap.lib
 import time
+
 from pydap.client import open_url
+from string import join
+
 from url_helper import get_data_url
+from http_helper import get_user_agent
 
 __all__ = ['get_init_time', 'get_time_offset']
+
+pydap.lib.USER_AGENT = get_user_agent()
 
 def get_init_time():
     odap_url = get_data_url(service = 'odap')
@@ -16,8 +21,7 @@ def get_init_time():
         dtfmt = '%Y-%m-%dT%H:%M:%SZ'
         return dt.datetime.fromtimestamp(time.mktime(time.strptime(dtstr, dtfmt)))
     else:
-        filename = uh.get_data_url().split('/')[-1].split('_')
-        #filename = uh.get_data_url(service = service).split('/')[-1].split('_')
+        filename = get_data_url().split('/')[-1].split('_')
         # ['NAM', 'CONUS', '80km', '20120210', '0000.grib1']
         datestr = filename[-2]
         timestr = filename[-1].split('.')[0]

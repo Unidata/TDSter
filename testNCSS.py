@@ -1,11 +1,17 @@
-﻿import datetime as dt
-import numpy as np
-from string import join
+﻿import numpy as np
+import pydap.lib
+
+from netCDF4 import Dataset
 from nose.tools import raises
 from os import remove
-from netCDF4 import Dataset
+from pydap.client import open_url
+from string import join
 from TDSterErrors import NotAnNcFileError, MethodNotImplementedForFileType, UnexpectedFileTypeReturn
 from urllib2 import HTTPError
+
+from helpers.http_helper import get_user_agent, get_timeout
+
+pydap.lib.USER_AGENT = get_user_agent()
 
 class NcssData(object):
     def __init__(self, base_url, ncss_request, return_file, return_file_type):
@@ -107,8 +113,6 @@ class NcssData(object):
 
 def get_odap_data(requested_vars, data_url = None):
     from helpers import get_data_url, url_service_transform
-    from pydap.client import open_url
-
     if data_url is None:
         odap_url = get_data_url(service = 'odap')
     else:

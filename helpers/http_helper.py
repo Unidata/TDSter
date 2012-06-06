@@ -1,10 +1,24 @@
-__all__ = ['basic_http_request',]
+__all__ = ['basic_http_request', 'get_user_agent', 'get_timeout']
+
+def get_user_agent():
+    return 'pyTDSter'
+
+def get_timeout(timeout_type = 'check'):
+    '''
+    get the default request timeout for pyTDSter (in seconds)
+    '''
+    if timeout_type == 'check':
+        # Is server even running? 5 seconds
+        return 5
+    else:
+        # 5 minutes
+        return 300
 
 def basic_http_request(full_url, return_response = False):
     import urllib2
 
     url_request = urllib2.Request(full_url)
-    url_request.add_header('User-agent', 'pyTDSter')
+    url_request.add_header('User-agent', get_user_agent())
     try:
         response = urllib2.urlopen(url_request)
         if return_response:
