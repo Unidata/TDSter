@@ -1,11 +1,20 @@
 ﻿def run_tests(verbosity=1):
     import os
+    from string import join
     # check for tmp data dir for NCSS tests
     tmp_data_dir = 'data_tmp/'
     if not os.path.exists(tmp_data_dir):
         os.mkdir(tmp_data_dir)
 
-    os.system('nosetests --verbosity={} --nologcapture'.format(verbosity,))
+    tests = join(['testServiceSanity.py',
+                  'testNCSS.py',
+                  'testMotherlodeTopcatalog.py'], ',')
+
+    nosetests_options = join(['--tests={}'.format(tests),
+                              '--verbosity={}'.format(verbosity),
+                              '--nologcapture'], ' ')
+
+    os.system('nosetests {}'.format(nosetests_options,))
 
     os.removedirs(tmp_data_dir)
 
