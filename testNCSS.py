@@ -507,8 +507,3 @@ def test_ncss_var_single_time_present_netCDF():
     # ToDo: Check if subsetting is done correctly!
     #ncss.check_against_odap(odap_data, var, odap_subset = ':,{},{}'.format(time_index+1))
     ncss.remove_return_file()
-
-############################
-# TDS Service Sanity Check #
-############################
-

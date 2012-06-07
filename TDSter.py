@@ -5,10 +5,9 @@
     if not os.path.exists(tmp_data_dir):
         os.mkdir(tmp_data_dir)
 
-    tds_tests = ["serviceSanityTest", "testNCSS", "testMotherlodeTopcatalog"]
-    for tds_test in tds_tests:
-        print("\nRunning {}".format(tds_test))
-        os.system('nosetests {}.py --verbosity={} --nologcapture'.format(tds_test,verbosity))
+    os.system('nosetests --verbosity={} --nologcapture'.format(verbosity,))
+
+    os.removedirs(tmp_data_dir)
 
 if __name__ == '__main__':
     import argparse
