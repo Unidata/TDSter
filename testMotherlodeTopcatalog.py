@@ -8,7 +8,7 @@ def test_topcatalog_servers():
     user_agent = get_user_agent()
     timeout = get_timeout()
 
-    cat_url = 'http://motherlode:8080/thredds/topcatalog.xml'
+    cat_url = 'http://motherlode.ucar.edu:8080/thredds/topcatalog.xml'
     cat = TDSCatalog(cat_url)
     remove_list = {}
     server_count = 0
