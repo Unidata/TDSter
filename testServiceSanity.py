@@ -34,7 +34,6 @@ def test_ncss():
     basic_http_request(full_url, return_response = False)
 
 def test_opendap():
-
     full_url = get_data_url(service = 'odap')
     dataset = open_url(full_url)
     del dataset
@@ -65,4 +64,10 @@ def test_uddc():
 
 def test_ncml():
     full_url = nciso_url_setup(service='ncml')
+    basic_http_request(full_url, return_response = False)
+
+def test_rcv():
+    tds_server = 'http://motherlode.ucar.edu:9080/thredds'
+    service = 'remoteCatalogValidation.html'
+    full_url = join([tds_server, service], '/')
     basic_http_request(full_url, return_response = False)
