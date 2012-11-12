@@ -8,7 +8,7 @@ def get_timeout(timeout_type = 'check'):
     get the default request timeout for pyTDSter (in seconds)
     '''
     if timeout_type == 'check':
-        # Is server even running? 5 seconds
+        # Timeout to see if server even running? 5 seconds
         return 5
     else:
         # 5 minutes

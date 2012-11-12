@@ -1,10 +1,11 @@
 ﻿def run_tests(verbosity=1):
     import os
     from string import join
+    from helpers import tdster_defaults
     # check for tmp data dir for NCSS tests
-    tmp_data_dir = 'data_tmp/'
-    if not os.path.exists(tmp_data_dir):
-        os.mkdir(tmp_data_dir)
+
+    if not os.path.exists(tdster_defaults.tmp_data_dir):
+        os.mkdir(tdster_defaults.tmp_data_dir)
 
     tests = join(['testServiceSanity.py',
                   'testNCSS.py',
@@ -16,7 +17,7 @@
 
     os.system('nosetests {}'.format(nosetests_options,))
 
-    os.removedirs(tmp_data_dir)
+    os.removedirs(tdster_defaults.tmp_data_dir)
 
 if __name__ == '__main__':
     import argparse

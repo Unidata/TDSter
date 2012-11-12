@@ -2,12 +2,9 @@ from xml.dom import minidom as md
 from helpers import basic_http_request
 
 class TDSCatalog():
-
     def __init__(self, top_level_url):
         from string import join
-
-        #top_level_url = 'http://motherlode.ucar.edu:9080/thredds/catalog.xml'
-        self.base_tds_url = join([top_level_url.split('/thredds/')[0],'thredds'],'/')
+        self.base_tds_url = top_level_url.split('/thredds/')[0]
         xml_data = basic_http_request(top_level_url, return_response = True)
         doc = md.parse(xml_data)
         root = doc.firstChild
@@ -31,6 +28,23 @@ class TDSCatalog():
             nodes[node_name].append(node)
         return nodes
 
+    def list_nested_catalogs(self):
+        if len(self.nested_catalogs) != 0:
+            for nc in self.nested_catalogs:
+                print nc.getAttribute('xlink:title')
+        else:
+            print('There were no nested datasets found in the catalog.')
+
+    def get_nested_catalog_links(self):
+        from string import join
+        links = []
+        if len(self.nested_catalogs) != 0:
+            for nc in self.nested_catalogs:
+                catalog_url = join([self.base_tds_url,
+                                    nc.getAttribute('xlink:href')], '')
+                print catalog_url
+        else:
+            print('There were no nested datasets found in the catalog.')
 
 class SimpleService():
     def __init__(self, serviceNode):
@@ -39,7 +53,6 @@ class SimpleService():
         self.base = serviceNode.attributes['base'].value
 
 class TDSdataset():
-
     def __init__(self, rootNode, datasetNode):
         #
         # determine if dataset is direct or collection

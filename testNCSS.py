@@ -10,6 +10,7 @@ from TDSterErrors import NotAnNcFileError, MethodNotImplementedForFileType, Unex
 from urllib2 import HTTPError
 
 from helpers.http_helper import get_user_agent, get_timeout
+from helpers import tdster_defaults
 
 pydap.lib.USER_AGENT = get_user_agent()
 
@@ -177,14 +178,17 @@ def get_ncss_data(basic_ncss_request='', dataset = 'NCEP_NAM_CONUS_80km', age = 
     data_info = response.readlines()
 
     if ((return_file_type == 'netcdf') or (return_file_type == '')):
-        return_file = os.path.join('data_tmp','tmp.nc')
+        return_file = os.path.join(tdster_defaults.tmp_data_dir,'tmp.nc')
     elif (return_file_type == 'csv'):
-        return_file = os.path.join('data_tmp','tmp.csv')
+        return_file = os.path.join(tdster_defaults.tmp_data_dir,'tmp.csv')
     elif (return_file_type == 'xml'):
-        return_file = os.path.join('data_tmp','tmp.xml')
+        return_file = os.path.join(tdster_defaults.tmp_data_dir,'tmp.xml')
 
-    return_file = os.path.relpath(return_file)
+    #return_file = os.path.relpath(return_file)
     return_file = os.path.abspath(return_file)
+
+    if not os.path.exists(tdster_defaults.tmp_data_dir):
+        os.mkdir(tdster_defaults.tmp_data_dir)
 
     f = open(return_file, 'w')
     for line in data_info:
