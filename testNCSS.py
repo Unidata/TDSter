@@ -511,3 +511,52 @@ def test_ncss_var_single_time_present_netCDF():
     # ToDo: Check if subsetting is done correctly!
     #ncss.check_against_odap(odap_data, var, odap_subset = ':,{},{}'.format(time_index+1))
     ncss.remove_return_file()
+
+def test_ncss_vars_diff_vert_levels_netCDF():
+    # Request data via ncss
+    var1 = 'Temperature_height_above_ground'
+    var2 = 'Temperature_isobaric'
+    level = '100'
+    lat = 40
+    lon = -104
+    basic_ncss_request = "?var={}&var={}&latitude={}&longitude={}".format(var1,var2,lat,lon)
+    ncss = get_ncss_data(basic_ncss_request = basic_ncss_request, service = 'ncss', kind='grid_as_point',
+        return_file_type = 'netcdf')
+    ncf = Dataset(ncss.return_file, 'r')
+    # check for both vertical dimensions
+    assert ncf.variables.has_key('height_above_ground')
+    assert ncf.variables.has_key('isobaric')
+    ncss.remove_return_file()
+
+def test_ncss_vars_diff_vert_levels_sub_level_netCDF():
+    # Request data via ncss
+    var1 = 'Temperature_height_above_ground'
+    var2 = 'Temperature_isobaric'
+    level = '100'
+    lat = 40
+    lon = -104
+    basic_ncss_request = "?var={}&var={}&latitude={}&longitude={}&level={}".format(var1,var2,lat,lon,level)
+    ncss = get_ncss_data(basic_ncss_request = basic_ncss_request, service = 'ncss', kind='grid_as_point',
+        return_file_type = 'netcdf')
+    ncf = Dataset(ncss.return_file, 'r')
+    # check for both vertical dimensions
+    assert ncf.variables.has_key('height_above_ground')
+    assert ncf.variables.has_key('isobaric')
+    #make sure level parameter was respected
+    assert ncf.variables['isobaric'].size == 1
+    ncss.remove_return_file()
+
+def test_ncss_ens_netCDF():
+    # Request data via ncss
+    from helpers import get_init_time
+    init_time = get_init_time()
+    var = 'Temperature_height_above_ground'
+    lat = 40
+    lon = -104
+    basic_ncss_request = "?var={}&latitude={}&longitude={}&time={}".format(var,lat,lon,init_time.strftime('%Y-%m-%dT%H:%MZ'))
+    ncss = get_ncss_data(basic_ncss_request = basic_ncss_request, service = 'ncss', kind='grid_as_point',
+        return_file_type = 'netcdf', dataset="NCEP_GEFS_GLOBAL_1deg")
+
+    ncf = Dataset(ncss.return_file, 'r')
+    assert ncf.variables['ens0'].size != 1
+    ncss.remove_return_file()
