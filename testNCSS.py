@@ -9,7 +9,7 @@ from string import join
 from TDSterErrors import NotAnNcFileError, MethodNotImplementedForFileType, UnexpectedFileTypeReturn
 from urllib2 import HTTPError
 
-from helpers.http_helper import get_user_agent, get_timeout
+from helpers.http_helper import get_user_agent
 from helpers import tdster_defaults
 
 pydap.lib.USER_AGENT = get_user_agent()
@@ -117,7 +117,7 @@ def get_odap_data(requested_vars, data_url = None):
     if data_url is None:
         odap_url = get_data_url(service = 'odap')
     else:
-        odap_url = url_service_transform(url, to_service = 'odap')
+        odap_url = url_service_transform(data_url, to_service = 'odap')
 
     dataset = open_url(odap_url)
 
@@ -169,7 +169,7 @@ def get_ncss_data(basic_ncss_request='', dataset = 'NCEP_NAM_CONUS_80km', age = 
         elif hasattr(e, 'code'):
             print 'The server couldn\'t fulfill the request.'
             print 'Error code: {}'.format(e.code)
-            print 'TDS response: {}'.format(e.read())
+            print 'TDS response: {}'.format(e.message)
             print 'Full  url: {}'.format(full_url)
             raise
         else:
@@ -183,6 +183,8 @@ def get_ncss_data(basic_ncss_request='', dataset = 'NCEP_NAM_CONUS_80km', age = 
         return_file = os.path.join(tdster_defaults.tmp_data_dir,'tmp.csv')
     elif (return_file_type == 'xml'):
         return_file = os.path.join(tdster_defaults.tmp_data_dir,'tmp.xml')
+    else:
+        return_file = ''
 
     #return_file = os.path.relpath(return_file)
     return_file = os.path.abspath(return_file)
@@ -535,7 +537,7 @@ def test_ncss_vars_diff_vert_levels_sub_level_netCDF():
     level = '100'
     lat = 40
     lon = -104
-    basic_ncss_request = "?var={}&var={}&latitude={}&longitude={}&level={}".format(var1,var2,lat,lon,level)
+    basic_ncss_request = "?var={}&var={}&latitude={}&longitude={}&vertCoord={}".format(var1,var2,lat,lon,level)
     ncss = get_ncss_data(basic_ncss_request = basic_ncss_request, service = 'ncss', kind='grid_as_point',
         return_file_type = 'netcdf')
     ncf = Dataset(ncss.return_file, 'r')
@@ -561,7 +563,6 @@ def test_ncss_ens_netCDF():
     basic_ncss_request = "?var={}&latitude={}&longitude={}&time={}".format(var,lat,lon,init_time.strftime('%Y-%m-%dT%H:%MZ'))
     ncss = get_ncss_data(basic_ncss_request = basic_ncss_request, service = 'ncss', kind='grid_as_point',
         return_file_type = 'netcdf', dataset="NCEP_GEFS_GLOBAL_1deg")
-
     ncf = Dataset(ncss.return_file, 'r')
     try:
         assert ncf.variables['ens0'].size != 1
@@ -570,3 +571,36 @@ def test_ncss_ens_netCDF():
         raise
     finally:
         ncss.remove_return_file()
+
+def test_no_time_axis():
+    import urllib2
+    import os
+    test_url = "http://motherlode.ucar.edu:9080/thredds/ncss/grid/subsetService/testdata/dist2coast_1deg_ocean.nc"
+    basic_ncss_request = "?var=dist&latitude=24&longitude=-90&accept=netcdf"
+    full_url = join([test_url,basic_ncss_request],'')
+
+    url_request = urllib2.Request(full_url)
+    url_request.add_header('User-agent', 'pyTDSter')
+    response = urllib2.urlopen(url_request)
+    ncf_loc = os.path.join(tdster_defaults.tmp_data_dir,'tmp.nc')
+    data_info = response.readlines()
+    return_file = os.path.abspath(ncf_loc)
+
+    if not os.path.exists(tdster_defaults.tmp_data_dir):
+        os.mkdir(tdster_defaults.tmp_data_dir)
+
+    f = open(return_file, 'w')
+    for line in data_info:
+        f.write(line)
+    f.close()
+    ncf = Dataset(ncf_loc, 'r')
+    try:
+        assert len(ncf.dimensions.keys()) == 1
+        assert ncf.dimensions.has_key('obs')
+    except AssertionError:
+        print("ERROR: Should only have one dimension ('obs') but more than one found!")
+        raise
+    finally:
+        remove(ncf_loc)
+
+
