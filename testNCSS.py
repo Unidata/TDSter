@@ -543,8 +543,13 @@ def test_ncss_vars_diff_vert_levels_sub_level_netCDF():
     assert ncf.variables.has_key('height_above_ground')
     assert ncf.variables.has_key('isobaric')
     #make sure level parameter was respected
-    assert ncf.variables['isobaric'].size == 1
-    ncss.remove_return_file()
+    try:
+        assert ncf.variables['isobaric'].size == 1
+    except AssertionError:
+        print("ERROR: {} isobaric levels found; Only 1 isobaric level should be returned!".format(ncf.variables['isobaric'].size))
+        raise
+    finally:
+        ncss.remove_return_file()
 
 def test_ncss_ens_netCDF():
     # Request data via ncss
@@ -558,5 +563,10 @@ def test_ncss_ens_netCDF():
         return_file_type = 'netcdf', dataset="NCEP_GEFS_GLOBAL_1deg")
 
     ncf = Dataset(ncss.return_file, 'r')
-    assert ncf.variables['ens0'].size != 1
-    ncss.remove_return_file()
+    try:
+        assert ncf.variables['ens0'].size != 1
+    except AssertionError:
+        print("ERROR: 1 ensemble member found; All members should be returned!")
+        raise
+    finally:
+        ncss.remove_return_file()
