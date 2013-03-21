@@ -1,14 +1,16 @@
 from catalogTDS import TDSCatalog
+from string import join
+from helpers.tdster_defaults import testServer
 
 def test_topcatalog_servers():
     import urllib2
 
-    from helpers import get_user_agent, basic_http_request, get_timeout
+    from helpers import get_user_agent, get_timeout
 
     user_agent = get_user_agent()
     timeout = get_timeout()
 
-    cat_url = 'http://motherlode.ucar.edu:8080/thredds/topcatalog.xml'
+    cat_url = join([testServer,'thredds','topcatalog.xml'],'/')
     cat = TDSCatalog(cat_url)
     remove_list = {}
     server_count = 0

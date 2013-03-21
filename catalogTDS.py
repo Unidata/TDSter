@@ -1,9 +1,10 @@
 from xml.dom import minidom as md
 from helpers import basic_http_request
+from helpers.tdster_defaults import testServer
+from string import join
 
 class TDSCatalog():
     def __init__(self, top_level_url):
-        from string import join
         self.base_tds_url = top_level_url.split('/thredds/')[0]
         xml_data = basic_http_request(top_level_url, return_response = True)
         doc = md.parse(xml_data)
@@ -123,7 +124,7 @@ if __name__ == '__main__':
     import argparse
 
     parser = argparse.ArgumentParser(description="Find all datasets on TDS server")
-    parser.add_argument("-u", "--url", default='http://motherlode.ucar.edu:9080/thredds/catalog.xml',
+    parser.add_argument("-u", "--url", default=join([testServer,'thredds','catalog.xml'],'/'),
         help="url of the TDS catalog xml file you wish to begin crawling")
     args = parser.parse_args()
 

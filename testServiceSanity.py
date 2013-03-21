@@ -3,8 +3,9 @@ import pydap.lib
 from pydap.client import open_url
 from string import join
 
-from helpers import get_data_url, url_service_transform, basic_http_request
+from helpers import get_data_url, basic_http_request
 from helpers import get_user_agent
+from helpers.tdster_defaults import testServer
 
 pydap.lib.USER_AGENT = get_user_agent()
 
@@ -67,7 +68,7 @@ def test_ncml():
     basic_http_request(full_url, return_response = False)
 
 def test_rcv():
-    tds_server = 'http://motherlode.ucar.edu:9080/thredds'
+    tds_server = join([testServer,'thredds'],'/')
     service = 'remoteCatalogValidation.html'
     full_url = join([tds_server, service], '/')
     basic_http_request(full_url, return_response = False)

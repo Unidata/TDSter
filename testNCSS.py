@@ -575,7 +575,8 @@ def test_ncss_ens_netCDF():
 def test_no_time_axis():
     import urllib2
     import os
-    test_url = "http://motherlode.ucar.edu:9080/thredds/ncss/grid/subsetService/testdata/dist2coast_1deg_ocean.nc"
+    test_url = join([tdster_defaults.testServer, "thredds/ncss/grid/subsetService",
+                                                "/testdata/dist2coast_1deg_ocean.nc"],'/')
     basic_ncss_request = "?var=dist&latitude=24&longitude=-90&accept=netcdf"
     full_url = join([test_url,basic_ncss_request],'')
 
