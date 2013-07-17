@@ -1,124 +1,167 @@
-from xml.dom import minidom as md
+import xml.etree.ElementTree as ET
 from helpers import basic_http_request
 from helpers.tdster_defaults import testServer
 from string import join
+import sys
 
 class TDSCatalog():
-    def __init__(self, top_level_url):
-        self.base_tds_url = top_level_url.split('/thredds/')[0]
-        xml_data = basic_http_request(top_level_url, return_response = True)
-        doc = md.parse(xml_data)
-        root = doc.firstChild
-        all_nodes = [e for e in root.childNodes if e.nodeType == e.ELEMENT_NODE]
-        self.nodes = self.node_to_dict(all_nodes)
-        # find nested catalogs
-        self.nested_catalogs = root.getElementsByTagName('catalogRef')
-        datasets = []
-        for e in root.childNodes:
-            if ((e.nodeType == e.ELEMENT_NODE) and (e.nodeName == 'dataset')):
-                datasets.append(TDSdataset(root, e))
-
-        self.datasets = datasets
-
-    def node_to_dict(self, all_nodes):
-        nodes = {}
-        for node in all_nodes:
-            node_name = node.nodeName
-            if node_name not in nodes.keys():
-                nodes[node_name] = []
-            nodes[node_name].append(node)
-        return nodes
-
-    def list_nested_catalogs(self):
-        if len(self.nested_catalogs) != 0:
-            for nc in self.nested_catalogs:
-                print nc.getAttribute('xlink:title')
+    def __init__(self, catalogUrl):
+        # top level server url
+        self.catalogUrl = catalogUrl
+        self.base_tds_url = catalogUrl.split('/thredds/')[0]
+        # get catalog.xml file
+        xml_data = basic_http_request(catalogUrl, return_response = True)
+        # begin parsing the xml doc
+        tree = ET.parse(xml_data)
+        root = tree.getroot()
+        if root.attrib.has_key("name"):
+            self.catalog_name = root.attrib["name"]
         else:
-            print('There were no nested datasets found in the catalog.')
+            self.catalog_name = "No name found"
 
-    def get_nested_catalog_links(self):
-        from string import join
-        links = []
-        if len(self.nested_catalogs) != 0:
-            for nc in self.nested_catalogs:
-                catalog_url = join([self.base_tds_url,
-                                    nc.getAttribute('xlink:href')], '')
-                print catalog_url
-        else:
-            print('There were no nested datasets found in the catalog.')
+        self.datasets = {}
+        self.services = []
+        self.catalogRefs = {}
+        for child in root.iter():
+            tagType = child.tag.split('}')[-1]
+
+            if tagType == "service":
+                if child.attrib["serviceType"] != "Compound":
+                    self.services.append(SimpleService(child))
+            elif tagType == "dataset":
+                if child.attrib.has_key("urlPath"):
+                    if child.attrib["urlPath"] == "latest.xml":
+                        ds = Dataset(child, catalogUrl)
+                    else:
+                        ds = Dataset(child)
+                    self.datasets[ds.name] = ds
+            elif tagType == "catalogRef":
+                catalogRef = CatalogRef(child)
+                self.catalogRefs[catalogRef.title] = catalogRef
+
+        self.numberOfDatasets = len(self.datasets.keys())
+        for dsName in self.datasets.keys():
+            self.datasets[dsName].makeAccessUrls(self.base_tds_url, self.services)
+
+class CatalogRef():
+    def __init__(self, elementNode):
+        self.name = elementNode.attrib["name"]
+        self.href = elementNode.attrib["{http://www.w3.org/1999/xlink}href"]
+        if self.href[0] == '/':
+            self.href = self.href[1:]
+        self.title = elementNode.attrib["{http://www.w3.org/1999/xlink}title"]
+
+class Dataset():
+    def __init__(self, elementNode, catalogUrl = ""):
+        self.name = elementNode.attrib['name']
+        self.urlPath = elementNode.attrib['urlPath']
+        self.resolved = False
+        self.resolverUrl = None
+        # if latest.xml, resolve the latest url
+        if self.urlPath == "latest.xml":
+            if catalogUrl != "":
+                self.resolved = True
+                self.resolverUrl = self.urlPath
+                self.urlPath = self.resolveUrl(catalogUrl)
+            else:
+                print "Must pass along the catalog URL to resolve the latest.xml dataset!"
+
+    def resolveUrl(self,catalogUrl):
+            if catalogUrl != "":
+                resolverBase = catalogUrl.split("catalog.xml")[0]
+                resolverUrl = resolverBase + self.urlPath
+                resolverXml = basic_http_request(resolverUrl, return_response = True)
+                tree = ET.parse(resolverXml)
+                root = tree.getroot()
+                self.catalog_name = root.attrib["name"]
+                found = False
+                for child in root.iter():
+                    if not found:
+                        tagType = child.tag.split('}')[-1]
+                        if tagType == "dataset":
+                            if child.attrib.has_key("urlPath"):
+                                ds = Dataset(child)
+                                resolvedUrl = ds.urlPath
+                                found = True
+                if found:
+                    return resolvedUrl
+                else:
+                    print "no dataset url path found in latest.xml!"
+
+    def makeAccessUrls(self, catalogUrl, services):
+        accessUrls = {}
+        serverUrl = catalogUrl.split('/thredds/')[0]
+        for service in services:
+            if service.serviceType != 'Resolver':
+                accessUrls[service.serviceType] = serverUrl + service.base + self.urlPath
+
+        self.accessUrls = accessUrls
+
 
 class SimpleService():
     def __init__(self, serviceNode):
-        self.name = serviceNode.attributes['name'].value
-        self.serviceType = serviceNode.attributes['serviceType'].value
-        self.base = serviceNode.attributes['base'].value
+        self.name = serviceNode.attrib['name']
+        self.serviceType = serviceNode.attrib['serviceType']
+        self.base = serviceNode.attrib['base']
 
-class TDSdataset():
-    def __init__(self, rootNode, datasetNode):
-        #
-        # determine if dataset is direct or collection
-        #
-        has_datasets = len(datasetNode.getElementsByTagName('dataset')) != 0
-        has_catalogRefs = len(datasetNode.getElementsByTagName('catalogRef')) != 0
-        if (has_datasets or has_catalogRefs):
-            self.type = 'collection'
-        else:
-            self.type = 'direct'
-
-        self.name = datasetNode.attributes['name'].value
-        #
-        # Stuff in the metadata
-        #
-        self.metadata = datasetNode.getElementsByTagName('metadata')
-        #
-        # get services for the dataset
-        #
-        services = {'simple' : {}, 'compound' : {}}
-        # check for root level service tags
-        if isinstance(rootNode,TDSdataset):
-            services = self.updateServiceDict(services, rootNode.services)
-        else:
-            for e in rootNode.childNodes:
-                services = self.updateServiceDict(services, self.searchServiceTags(e))
-
-        # look in metadata tags for service tags
-        if self.metadata != []:
-            for md in self.metadata:
-                for e in md.childNodes:
-                    services = self.updateServiceDict(services, self.searchServiceTags(e))
+class CompoundService():
+    def __init__(self, serviceNode):
+        self.name = serviceNode.attrib['name']
+        self.serviceType = serviceNode.attrib['serviceType']
+        self.base = serviceNode.attrib['base']
+        services = []
+        for child in list(serviceNode):
+          services.append(SimpleService(child))
 
         self.services = services
 
-        subdatasets = []
-        if self.type == 'collection':
-            for e in datasetNode.childNodes:
-                if ((e.nodeType == e.ELEMENT_NODE) and (e.nodeName == 'dataset')):
-                    subdatasets.append(TDSdataset(self, e))
-        self.subdatasets = subdatasets
+def fullCatalogInv(url):
+        cat = TDSCatalog(url)
+        names = cat.datasets.keys()
+        names.sort()
 
-    def searchServiceTags(self, e):
-        services = {'simple' : {}, 'compound' : {}}
-        if ((e.nodeType == e.ELEMENT_NODE) and (e.nodeName == 'service')):
-            if e.attributes['serviceType'] =='Compound':
-                services['compound'][e.attributes['name'].value] = {}
-                sub_service_nodes = e.getElementsByTagName('service')
-                for ssn in sub_service_nodes:
-                    services['compound'][e.attributes['name'].value] = SimpleService(ssn)
-            else:
-                services['simple'][e.attributes['name'].value] = SimpleService(e)
+        refs = cat.catalogRefs.keys()
+        refs.sort()
 
-        return services
+        print("Datasets:")
+        for name in names:
+            print("    {}".format(name,))
 
-    def updateServiceDict(self, base_dict, new_dict):
-        serviceTypes = ['simple','compound']
-        for st in serviceTypes:
-            for simkey in new_dict[st].keys():
-                if base_dict[st].has_key(simkey):
-                    raise NameError("Service already defined - must be unique!")
+        if refs != []:
+            print("CatalogRefs:")
+            for ref in refs:
+                print("    {}".format(ref,))
 
-                base_dict[st][simkey] = new_dict[st][simkey]
+        if refs != []:
+            for ref in refs:
+                fullCatalogInv(join(["http://thredds.ucar.edu",cat.catalogRefs[ref].href],'/'))
 
-        return base_dict
+def applyTestFullCatalogInv(url, testFunc = None, datasetKey="latest"):
+        def defaultTestFunc(x):
+            for key in x.keys():
+                print(key)
+
+        if testFunc is None:
+            testFunc = defaultTestFunc
+
+        cat = TDSCatalog(url)
+        names = cat.datasets.keys()
+        names.sort()
+
+        refs = cat.catalogRefs.keys()
+        refs.sort()
+        for name in names:
+            testUrl = cat.datasets[name].urlPath
+            if cat.datasets[name].resolved:
+                testUrl = cat.datasets[name].resolverUrl
+
+            if datasetKey in testUrl:
+                testFunc(cat.datasets[name])
+
+        if refs != []:
+            for ref in refs:
+                applyTestFullCatalogInv("http://thredds.ucar.edu" + cat.catalogRefs[ref].href,
+                                        testFunc=testFunc, datasetKey=datasetKey)
 
 if __name__ == '__main__':
     import argparse
@@ -128,17 +171,5 @@ if __name__ == '__main__':
         help="url of the TDS catalog xml file you wish to begin crawling")
     args = parser.parse_args()
 
-    cat = TDSCatalog(args.url)
-    for ds in cat.datasets:
-        print "main"
-        print (ds.name, ds.type)
-
-        for sds in ds.subdatasets:
-            print "sub"
-            print (sds.name, sds.type)
-
-            for ssds in sds.subdatasets:
-                print 'subsub'
-                print (ssds.name, ssds.type)
-    #for col in cat.datasets['collection']:
-    #    print cat.datasets['collection'][col].toxml()
+    url = args.url
+    fullCatalogInv(url)

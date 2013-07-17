@@ -14,9 +14,10 @@ def test_topcatalog_servers():
     cat = TDSCatalog(cat_url)
     remove_list = {}
     server_count = 0
-    for nested_catalog in cat.nested_catalogs:
+    topCatalogServers = cat.catalogRefs.keys()
+    for server in topCatalogServers:
         server_count += 1
-        test_url = nested_catalog.attributes['xlink:href'].value
+        test_url = cat.catalogRefs[server].href
         url_request = urllib2.Request(test_url)
         url_request.add_header('User-agent', user_agent)
         try:
