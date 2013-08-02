@@ -9,7 +9,9 @@
 
     tests = join(['testServiceSanity.py',
                   'testNCSS.py',
-                  'testMotherlodeTopcatalog.py'], ',')
+                  'testMotherlodeTopcatalog.py',
+                  'testLatestNcep.py',
+                  'testLatestFnmoc.py'], ',')
 
     nosetests_options = join(['--tests={}'.format(tests),
                               '--verbosity={}'.format(verbosity),

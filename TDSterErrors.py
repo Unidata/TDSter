@@ -1,3 +1,5 @@
+from helpers.tdster_defaults import testServer
+
 __all__ = ['NotAnNcFileError', 'MethodNotImplementedForFileType', 'UnexpectedFileTypeReturn', 'NotAValidService']
 
 class NotAnNcFileError(Exception):
@@ -56,3 +58,35 @@ class NotAValidService(Exception):
 
     def __str__(self):
         return repr(self.service_error)
+
+class CannnotReachThreddsServer(Exception):
+    '''
+    Exception class to indicate that a file cannot be opened as a netCDF file.
+    '''
+    def __init__(self, badServers, server_count):
+        self.badServers = badServers
+        self.server_count = server_count
+
+    def __str__(self):
+        print('{} severs tested'.format(self.server_count))
+        print('Error - the following servers had errors:\n')
+        for server in self.badServers.keys():
+            print('{} : {}'.format(server, self.badServers[server]))
+
+
+class StaleDatasetsDetected(Exception):
+    '''
+    Exception class to indicate that a file cannot be opened as a netCDF file.
+    '''
+
+    def __init__(self, report):
+        self.testServer = testServer
+        self.report = report
+
+    def __str__(self):
+        errorMsg = []
+        errorMsg.append("Some of the datasets on {} are old:".format(testServer))
+        for oldie in self.report:
+            errorMsg.append("    " + oldie)
+        errorMsg = "\n".join(errorMsg)
+        return errorMsg

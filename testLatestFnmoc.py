@@ -1,13 +1,13 @@
 import testLatest
 from TDSterErrors import StaleDatasetsDetected
 
-def test_ncep_latest():
+def test_fnmoc_latest():
 
     from helpers.tdster_defaults import testServer
     if testServer[-1] != "/":
         testServer = testServer + "/"
 
-    catalog = testServer + "thredds/idd/modelsNcep.xml"
+    catalog = testServer + "thredds/idd/modelsFnmoc.xml"
 
     report = testLatest.main(catalog)
 
@@ -17,4 +17,4 @@ def test_ncep_latest():
         raise StaleDatasetsDetected(report)
 
 if __name__ == "main":
-    test_ncep_latest()
+    test_fnmoc_latest()

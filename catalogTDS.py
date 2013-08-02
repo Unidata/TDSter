@@ -134,7 +134,7 @@ def fullCatalogInv(url):
 
         if refs != []:
             for ref in refs:
-                fullCatalogInv(join(["http://thredds.ucar.edu",cat.catalogRefs[ref].href],'/'))
+                fullCatalogInv(join([testServer,cat.catalogRefs[ref].href],'/'))
 
 def applyTestFullCatalogInv(url, testFunc = None, datasetKey="latest"):
         def defaultTestFunc(x):
@@ -160,7 +160,11 @@ def applyTestFullCatalogInv(url, testFunc = None, datasetKey="latest"):
 
         if refs != []:
             for ref in refs:
-                applyTestFullCatalogInv("http://thredds.ucar.edu" + cat.catalogRefs[ref].href,
+                tmpRef = cat.catalogRefs[ref].href
+                if tmpRef[0] == "/":
+                    tmpRef = tmpRef[1:]
+
+                applyTestFullCatalogInv(testServer + tmpRef,
                                         testFunc=testFunc, datasetKey=datasetKey)
 
 if __name__ == '__main__':

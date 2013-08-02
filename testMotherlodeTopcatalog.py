@@ -1,6 +1,7 @@
 from catalogTDS import TDSCatalog
 from string import join
 from helpers.tdster_defaults import testServer
+from TDSterErrors import CannnotReachThreddsServer
 
 def test_topcatalog_servers():
     import urllib2
@@ -12,7 +13,7 @@ def test_topcatalog_servers():
 
     cat_url = join([testServer,'thredds','topcatalog.xml'],'/')
     cat = TDSCatalog(cat_url)
-    remove_list = {}
+    badServers = {}
     server_count = 0
     topCatalogServers = cat.catalogRefs.keys()
     for server in topCatalogServers:
@@ -38,13 +39,9 @@ def test_topcatalog_servers():
                 print 'error not caught!'
                 raise
 
-            remove_list[test_url] = error_info
+            badServers[test_url] = error_info
             del error_info
             pass
 
-    if remove_list.keys() != []:
-        print('{} severs tested'.format(server_count))
-        print('Error - the following servers had errors:\n')
-        for server in remove_list.keys():
-            print('{} : {}'.format(server, remove_list[server]))
-            raise NameError('Check These Servers!!!')
+    if badServers.keys() != []:
+        raise CannnotReachThreddsServer(badServers, server_count)
