@@ -1,6 +1,8 @@
 from helpers.tdster_defaults import testServer
 
-__all__ = ['NotAnNcFileError', 'MethodNotImplementedForFileType', 'UnexpectedFileTypeReturn', 'NotAValidService']
+__all__ = ["NotAnNcFileError", "MethodNotImplementedForFileType",
+           "UnexpectedFileTypeReturn", "NotAValidService",
+           "CannotReachThreddsServer", "StaleDatasetDetected"]
 
 class NotAnNcFileError(Exception):
     '''
@@ -68,11 +70,13 @@ class CannnotReachThreddsServer(Exception):
         self.server_count = server_count
 
     def __str__(self):
-        print('{} severs tested'.format(self.server_count))
-        print('Error - the following servers had errors:\n')
+        errorMsg = []
+        errorMsg.append("{} severs tested".format(self.server_count))
+        errorMsg.append("Error - the following servers had errors:\n")
         for server in self.badServers.keys():
-            print('{} : {}'.format(server, self.badServers[server]))
-
+            errorMsg.append("{} : {}".format(server, self.badServers[server]))
+        errorMsg = "\n".join(errorMsg)
+        return errorMsg
 
 class StaleDatasetsDetected(Exception):
     '''

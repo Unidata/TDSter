@@ -40,6 +40,7 @@ def testLatestTime(catDataset):
 
 def main(catalog):
     global report
+    report = []
 
     catalogTDS.applyTestFullCatalogInv(catalog, datasetKey="latest", testFunc = testLatestTime)
 
