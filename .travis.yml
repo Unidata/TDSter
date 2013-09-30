@@ -11,3 +11,9 @@ before_install:
 
 # command to run tests
 script: python ./TDSter.py --verbosity 1
+
+notifications:
+  email:
+    - sarms@unidata.ucar.edu
+    on_success: always
+    on_failure: always
