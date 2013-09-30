@@ -5,7 +5,7 @@ python:
 
 before_install:
  - sudo apt-get update -qq
- - sudo apt-get install -qq libnetcdf-dev libnetcdf
+ - sudo apt-get install -qq libnetcdf-dev
 
 install:
   - pip install -r requirements.txt --use-mirrors
