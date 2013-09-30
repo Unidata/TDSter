@@ -16,5 +16,5 @@ notifications:
   email:
     recipients:
       - sarms@unidata.ucar.edu
-    on_success: always
-    on_failure: always
+    on_success: [always|never|change] # default: change
+    on_failure: [always|never|change] # default: always
