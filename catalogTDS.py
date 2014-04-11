@@ -2,6 +2,8 @@ import xml.etree.ElementTree as ET
 from helpers import basic_http_request
 from helpers.tdster_defaults import testServer
 from string import join
+import urllib2
+
 import sys
 
 class TDSCatalog():
@@ -30,7 +32,7 @@ class TDSCatalog():
                     self.services.append(SimpleService(child))
             elif tagType == "dataset":
                 if child.attrib.has_key("urlPath"):
-                    if child.attrib["urlPath"] == "latest.xml":
+                    if child.attrib["urlPath"].endswith("latest.xml"):
                         ds = Dataset(child, catalogUrl)
                     else:
                         ds = Dataset(child)
@@ -58,7 +60,7 @@ class Dataset():
         self.resolved = False
         self.resolverUrl = None
         # if latest.xml, resolve the latest url
-        if self.urlPath == "latest.xml":
+        if self.urlPath.endswith("latest.xml"):
             if catalogUrl != "":
                 self.resolved = True
                 self.resolverUrl = self.urlPath
@@ -137,35 +139,45 @@ def fullCatalogInv(url):
                 fullCatalogInv(join([testServer,cat.catalogRefs[ref].href],'/'))
 
 def applyTestFullCatalogInv(url, testFunc = None, datasetKey="latest"):
+        success = False
         def defaultTestFunc(x):
-            for key in x.keys():
-                print(key)
+            print x.name
+            #for key in x:
+            #    print(key)
 
         if testFunc is None:
             testFunc = defaultTestFunc
 
-        cat = TDSCatalog(url)
-        names = cat.datasets.keys()
-        names.sort()
+        try:
+            cat = TDSCatalog(url)
+            success = True
+        except urllib2.HTTPError, e:
+            print(e.code, e.reason, url)
+            success = False
+            pass
 
-        refs = cat.catalogRefs.keys()
-        refs.sort()
-        for name in names:
-            testUrl = cat.datasets[name].urlPath
-            if cat.datasets[name].resolved:
-                testUrl = cat.datasets[name].resolverUrl
+        if success:
+            names = cat.datasets.keys()
+            names.sort()
 
-            if datasetKey in testUrl:
-                testFunc(cat.datasets[name])
+            refs = cat.catalogRefs.keys()
+            refs.sort()
+            for name in names:
+                testUrl = cat.datasets[name].urlPath
+                if cat.datasets[name].resolved:
+                    testUrl = cat.datasets[name].resolverUrl
 
-        if refs != []:
-            for ref in refs:
-                tmpRef = cat.catalogRefs[ref].href
-                if tmpRef[0] == "/":
-                    tmpRef = tmpRef[1:]
+                if datasetKey in testUrl:
+                    testFunc(cat.datasets[name])
 
-                applyTestFullCatalogInv(testServer + tmpRef,
-                                        testFunc=testFunc, datasetKey=datasetKey)
+            if refs != []:
+                for ref in refs:
+                    tmpRef = cat.catalogRefs[ref].href
+                    if tmpRef[0] == "/":
+                        tmpRef = tmpRef[1:]
+
+                    applyTestFullCatalogInv(testServer + tmpRef,
+                                            testFunc=testFunc, datasetKey=datasetKey)
 
 if __name__ == '__main__':
     import argparse

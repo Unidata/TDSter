@@ -25,6 +25,21 @@ def basic_http_request(full_url, return_response = False):
             return response
         else:
             del response
+    except urllib2.HTTPError, e:
+        if hasattr(e, 'reason'):
+            print 'We failed to reach a server.'
+            print 'Reason: {}'.format(e.reason)
+            print 'Full  url: {}'.format(full_url)
+            raise
+        elif hasattr(e, 'code'):
+            print 'The server couldn\'t fulfill the request.'
+            print 'Error code: {}'.format(e.code)
+            print 'TDS response: {}'.format(e.read())
+            print 'Full  url: {}'.format(full_url)
+            raise
+        else:
+            print 'error not caught!'
+            raise
     except IOError, e:
         if hasattr(e, 'reason'):
             print 'We failed to reach a server.'

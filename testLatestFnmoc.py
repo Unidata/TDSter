@@ -1,4 +1,4 @@
-import testLatest
+import generateLatestReport
 from TDSterErrors import StaleDatasetsDetected
 
 def test_fnmoc_latest():
@@ -9,7 +9,7 @@ def test_fnmoc_latest():
 
     catalog = testServer + "thredds/idd/modelsFnmoc.xml"
 
-    report = testLatest.main(catalog)
+    report = generateLatestReport.main(catalog)
 
     try:
         assert len(report) == 0

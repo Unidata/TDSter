@@ -1,5 +1,4 @@
 from http_helper import get_user_agent
-from tdster_defaults import testServer
 
 __all__ = ['strip_date', 'get_data_url', 'url_service_transform']
 
@@ -35,7 +34,7 @@ def url_service_transform(url, from_service = None, to_service = None):
             if service_id[service] in url:
                 return url.replace(service_id[service], service_id[to_service])
 
-def get_data_url(dataset = 'NCEP_NAM_CONUS_80km', age = 'latest', service = 'ncss', server='4.3'):
+def get_data_url(testServer, dataset = 'NCEP_NAM_CONUS_80km', age = 'latest', service = 'ncss'):
 
     '''
     This function is used to retrieve the url on the motherlode
