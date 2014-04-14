@@ -27,10 +27,15 @@ def testLatestTimeByName(catDataset):
         initTime = parser.parse(fileDate + fileTime).replace(tzinfo=pytz.UTC)
         currentTime = dt.datetime.utcnow().replace(tzinfo=pytz.UTC)
         timeDiff = dateutil.relativedelta.relativedelta(currentTime, initTime)
-        simpleAgeReport[catDataset.name] = timeDiff.hours
+        hoursOff = timeDiff.hours
+        if timeDiff.days > 1:
+            hoursOff = hoursOff + timeDiff.days * 24.
+
+        simpleAgeReport[catDataset.name] = hoursOff
+
         if timeDiff.hours < 0:
             print("help - time diff is negative: {} hours".format(timeDiff.hours))
-        if timeDiff.hours >= 12:
+        if hoursOff >= 12:
             message = "The latest {} dataset is more than {} hours(s) old!".format(catDataset.name, timeDiff.hours)
             potentialStaleDSReport[catDataset.name] = message
 
