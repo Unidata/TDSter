@@ -6,7 +6,7 @@ import pytz
 import datetime as dt
 from dateutil import parser
 
-from helpers.tdster_defaults import testServer
+from helpers.tdster_defaults import defaultTestCatalog
 
 potentialStaleDSReport = {}
 simpleAgeReport = {}

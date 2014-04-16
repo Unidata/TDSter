@@ -1,6 +1,6 @@
 import xml.etree.ElementTree as ET
 from helpers import basic_http_request
-from helpers.tdster_defaults import testServer
+from helpers.tdster_defaults import defaultTestCatalog
 from string import join
 import urllib2
 
@@ -11,6 +11,8 @@ class TDSCatalog():
         # top level server url
         self.catalogUrl = catalogUrl
         self.base_tds_url = catalogUrl.split('/thredds/')[0]
+        if self.base_tds_url[-1] is not "/":
+            self.base_tds_url = self.base_tds_url + "/"
         # get catalog.xml file
         xml_data = basic_http_request(catalogUrl, return_response = True)
         # begin parsing the xml doc
@@ -136,7 +138,7 @@ def fullCatalogInv(url):
 
         if refs != []:
             for ref in refs:
-                fullCatalogInv(join([testServer,cat.catalogRefs[ref].href],'/'))
+                fullCatalogInv(join([cat.base_tds_url,cat.catalogRefs[ref].href],'/'))
 
 def applyTestFullCatalogInv(url, testFunc = None, datasetKey="latest"):
         success = False
@@ -176,16 +178,16 @@ def applyTestFullCatalogInv(url, testFunc = None, datasetKey="latest"):
                     if tmpRef[0] == "/":
                         tmpRef = tmpRef[1:]
 
-                    applyTestFullCatalogInv(testServer + tmpRef,
+                    applyTestFullCatalogInv(cat.base_tds_url + tmpRef,
                                             testFunc=testFunc, datasetKey=datasetKey)
 
 if __name__ == '__main__':
     import argparse
-
     parser = argparse.ArgumentParser(description="Find all datasets on TDS server")
-    parser.add_argument("-u", "--url", default=join([testServer,'thredds','catalog.xml'],'/'),
+    parser.add_argument("-u", "--url", default=defaultTestCatalog,
         help="url of the TDS catalog xml file you wish to begin crawling")
     args = parser.parse_args()
 
     url = args.url
-    fullCatalogInv(url)
+    #fullCatalogInv(server)
+    applyTestFullCatalogInv(url)

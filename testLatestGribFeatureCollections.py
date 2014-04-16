@@ -32,18 +32,17 @@ def testGribFeatureCollections(testServer, collectionName):
     if testServer[-1] != "/":
         testServer = testServer + "/"
 
-    catalog = testServer + gribFeatureCollectionInfo[collectionName]["topCatalog"]
+    catalog = testServer + gribFeatureCollectionInfo[testServer][collectionName]["topCatalog"]
     # get full report on status for the given gribFeatureCollections
     fullReport = generateLatestReport.main(catalog)
 
     simpleAgeReport = fullReport["simpleAgeReport"]
 
     # read in json datafile, if it exists
-    for reportName in simpleAgeReport:
+    for newReportName in simpleAgeReport:
         date_updated = False
-        new_data = False
 
-        reportFileName = cleanFileName(reportName) + ".json"
+        reportFileName = cleanFileName(newReportName) + ".json"
 
         outFileName = os.path.join(outFileDataPath, reportFileName)
 
@@ -55,10 +54,15 @@ def testGribFeatureCollections(testServer, collectionName):
             #collect known datasets in file
             # add the new scriptRunTime and data to the time data already present in file
             for reportName in simpleAgeReport:
+                # look for reportName in the file - must loop through all cols to see if
+                # it is anywhere in there
                 for colNum in range(len(jsonDataDict["columns"])):
+                    # if the data entry is for the date, update it once and do not
+                    # check again
                     if "date" in jsonDataDict["columns"][colNum] and not date_updated:
                         jsonDataDict["columns"][colNum].append(scriptRunTime)
                         date_updated = True
+                    # look for the correct data entry for reportName
                     elif reportName in jsonDataDict["columns"][colNum]:
                         jsonDataDict["columns"][colNum].append(simpleAgeReport[reportName])
         else:
@@ -70,13 +74,13 @@ def testGribFeatureCollections(testServer, collectionName):
             jsonDataDict = {}
             jsonDataDict["x"] = "date"
             cols.append(["date"] + [scriptRunTime])
-            cols.append([reportName, simpleAgeReport[reportName]])
+            cols.append([newReportName, simpleAgeReport[newReportName]])
             jsonDataDict["columns"] = cols
             jsonDataDict["x_format"] = dateFormat
 
         # finally, write updated (or new) json data file for
         # the given dataset
-        print("    Writing {} json data file".format(reportName))
+        print("    Writing {} json data file".format(newReportName))
 
         with io.open(outFileName, 'w', encoding='utf-8') as f:
           f.write(unicode(json.dumps(jsonDataDict, ensure_ascii=False)))
@@ -89,7 +93,7 @@ def main(testServer):
     global outFilePath
     global outFileDataPath
     global testing
-    for collectionName in gribFeatureCollectionInfo:
+    for collectionName in gribFeatureCollectionInfo[testServer]:
         outFileDataPath = getOutFileDataPath(testServer, testing)
         outFilePath = getOutFilePath(testServer, testing)
 
