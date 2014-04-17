@@ -17,6 +17,7 @@ def cleanFileName(fileName):
     fileName = fileName.replace("(", "")
     fileName = fileName.replace(")", "")
     fileName = fileName.lower()
+    fileName = fileName.replace("latestreferencetimecollectionfor", "latest")
 
     return fileName
 
