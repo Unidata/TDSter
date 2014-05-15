@@ -84,7 +84,7 @@ def testGribFeatureCollections(testServer, collectionName):
         print("    Writing {} json data file".format(newReportName))
 
         with io.open(outFileName, 'w', encoding='utf-8') as f:
-          f.write(unicode(json.dumps(jsonDataDict, ensure_ascii=False)))
+          f.write(unicode(json.dumps(jsonDataDict, ensure_ascii=False, indent=2)))
         f.close()
 
     return fullReport
@@ -104,7 +104,7 @@ def main(testServer):
         outFileName = os.path.join(outFileDataPath, "{}_fullReport.json".format(collectionName))
 
         with io.open(outFileName, 'w', encoding='utf-8') as f:
-          f.write(unicode(json.dumps(fullReport, ensure_ascii=False)))
+          f.write(unicode(json.dumps(fullReport, ensure_ascii=False, indent=2)))
         f.close()
 
 if __name__ == "__main__":

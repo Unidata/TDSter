@@ -7,7 +7,7 @@ from string import join
 
 from helpers import get_data_url, basic_http_request
 from helpers import get_user_agent
-from helpers.tdster_defaults import testServer
+from helpers.tdster_defaults import testServer, conf
 from urllib2 import HTTPError
 pydap.lib.USER_AGENT = get_user_agent()
 
@@ -106,9 +106,9 @@ def main(testServerUrl):
         print results[tst]
 
     testServerStr = testServer.replace("http",'').replace('.','-').replace('/','').replace(":","")
-    serverStatus =  os.path.join("/Users/sarms/Desktop/tdsDashboard/", testServerStr + "_status.json")
+    serverStatus =  os.path.join(conf["reportOutputDirectory"], testServerStr + "_status.json")
     with io.open(serverStatus, 'w', encoding='utf-8') as f:
-              f.write(unicode(json.dumps(results, ensure_ascii=False)))
+              f.write(unicode(json.dumps(results, ensure_ascii=False, indent=2)))
 
 if __name__ == "__main__":
     for testServer in ["http://thredds.ucar.edu/", "http://thredds-test.unidata.ucar.edu/"]:

@@ -3,14 +3,10 @@
     from helpers import tdster_defaults
     import testLatestGribFeatureCollections
     import scrapeServerInfo
-
-    # check for tmp data dir for NCSS tests
-
-    if not os.path.exists(tdster_defaults.tmp_data_dir):
-        os.mkdir(tdster_defaults.tmp_data_dir)
-
+    import reportStaleDatasets
     tests = [testLatestGribFeatureCollections,
-             scrapeServerInfo]
+             scrapeServerInfo,
+             reportStaleDatasets]
 
     for testServer in tdster_defaults.testServers:
         for tst in tests:
@@ -18,9 +14,6 @@
             eval(tst.__name__ + mainMethod)
             print("")
         print("===============\n")
-
-
-    os.removedirs(tdster_defaults.tmp_data_dir)
 
 if __name__ == '__main__':
     #import argparse

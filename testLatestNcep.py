@@ -79,7 +79,7 @@ def test_ncep_latest(testServer):
         print("    Writing {} json data file".format(name))
 
         with io.open(outFileName, 'w', encoding='utf-8') as f:
-          f.write(unicode(json.dumps(jsonDataDict, ensure_ascii=False)))
+          f.write(unicode(json.dumps(jsonDataDict, ensure_ascii=False, indent=2)))
 
     return fullReport
 
@@ -97,7 +97,7 @@ def main(testServer):
     outFileName = os.path.join(outFilePath, "data", "fullReport.json")
 
     with io.open(outFileName, 'w', encoding='utf-8') as f:
-      f.write(unicode(json.dumps(fullReport, ensure_ascii=False)))
+      f.write(unicode(json.dumps(fullReport, ensure_ascii=False, indent=2)))
 
 if __name__ == "__main__":
     from helpers.tdster_defaults import testServers

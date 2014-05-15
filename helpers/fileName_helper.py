@@ -28,10 +28,10 @@ def getServerUrlAsString(serverUrl):
 
 def initDataDir(test = False):
     global dataDir
-    dataDirMain = "/Users/sarms/Desktop/tdsDashboard/reports"
-    dataDirTest = "/Users/sarms/Desktop/tdsDashboard/reportsTest"
     import os
-
+    import tdster_defaults as td
+    dataDirMain = td.conf["reportOutputDirectory"]
+    dataDirTest = dataDirMain.replace("tdsDashbard/reports", "tdsDashboard/reportsTest")
     if not test:
         dataDir = os.path.join(dataDirMain)
     else:
