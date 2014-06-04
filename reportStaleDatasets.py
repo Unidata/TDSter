@@ -94,7 +94,8 @@ def main(testServer):
         with io.open(fullReportFile, 'r', encoding='utf-8') as f:
             data = json.load(f)
         currentAges = data["simpleAgeReport"]
-        for collection in currentAges:
+        for collection2 in currentAges:
+            collection = collection2.replace("-", " ").replace("_", " ")
             collectionChecked = False
             for specialCheck in specialChecks:
                 if specialCheck.lower() in collection.lower() and not collectionChecked:
