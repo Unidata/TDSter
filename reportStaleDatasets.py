@@ -24,7 +24,8 @@ maxAges = {"ncep" :
                "WWIII" : 11,
                "NDFD" : {"CONUS 5km" : 16,
                          "CONUS 5km conduit" : 2,
-                         "FireWx" : 6}
+                         "FireWx" : 6,
+                         "general" : 24}
               },
           "fnmoc" :
               {"COAMPS" : 18,
