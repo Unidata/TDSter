@@ -70,15 +70,17 @@ def specialCheckDS(specialCheck, collection, currentAges):
             if not "CONDUIT" in collection:
                 collectionChecked = True
                 maxAge = maxAges[reportType][specialCheck][namType]
-                currentAge = currentAges[collection]
-                if (currentAge > maxAge):
-                    report.append("{} is greater than {} hours old (should be less than {} hours old)".format(collection, currentAge, maxAge))
+                if collection in currentAges:
+                    currentAge = currentAges[collection]
+                    if (currentAge > maxAge):
+                        report.append("{} is greater than {} hours old (should be less than {} hours old)".format(collection, currentAge, maxAge))
 
     if not collectionChecked:
         maxAge = maxAges[reportType][specialCheck]["general"]
-        currentAge = currentAges[collection]
-        if (currentAge > maxAge):
-            report.append("{} is greater than {} hours old (should be less than {} hours old)".format(collection, currentAge, maxAge))
+        if collection in currentAges:
+            currentAge = currentAges[collection]
+            if (currentAge > maxAge):
+                report.append("{} is greater than {} hours old (should be less than {} hours old)".format(collection, currentAge, maxAge))
 
 
 def main(testServer):
@@ -113,9 +115,10 @@ def main(testServer):
                     if reportThisCollection and not collectionChecked:
                         collectionChecked = True
                         maxAge = maxAges[reportType][collectionName]
-                        currentAge = currentAges[collection]
-                        if (currentAge > maxAge):
-                            report.append("{} is greater than {} hours old (should be less than {} hours old)".format(collection, currentAge, maxAge))
+                        if collection in currentAges:
+                            currentAge = currentAges[collection]
+                            if (currentAge > maxAge):
+                                report.append("{} is greater than {} hours old (should be less than {} hours old)".format(collection, currentAge, maxAge))
 
     if report != []:
         email_report(testServer, report)
