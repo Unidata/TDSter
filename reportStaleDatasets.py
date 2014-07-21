@@ -31,7 +31,7 @@ maxAges = {"ncep" :
               {"COAMPS" : 18,
                "FAROP" : 9,
                "NAVGEM" : 12,
-               "NCODA" : 23,
+               "NCODA" : 33,
                "WWIII" : 18}
          }
 
