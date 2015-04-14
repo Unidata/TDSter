@@ -17,14 +17,16 @@ def findAndReadConfigFile():
     return conf
 
 def createGribFeatureCollectionInfo(testServers):
-    coreFeatureCollectionInfo = {"ncep" : {"topCatalog" : "thredds/idd/modelsNcep.xml"},
-                                 "fnmoc": {"topCatalog" : "thredds/idd/modelsFnmoc.xml"}}
+    if ("thredds.ucar.edu" in testServers) or ("weather.rsmas" in testServers):
+        coreFeatureCollectionInfo = {"ncep" : {"topCatalog" : "thredds/idd/modelsNcep.xml"},
+                                     "fnmoc": {"topCatalog" : "thredds/idd/modelsFnmoc.xml"}}
+    else:
+        coreFeatureCollectionInfo = {"fpaa" : {"topCatalog" : "thredds/idd/forecastProdsAndAna.xml"},
+                                     "fnmoc": {"topCatalog" : "thredds/idd/forecastModels.xml"}}
 
     gribFeatureCollectionInfo = {}
     for testServer in testServers:
         gribFeatureCollectionInfo[testServer] = coreFeatureCollectionInfo.copy()
-        #if "thredds-test.unidata.ucar.edu" in testServer:
-        #    gribFeatureCollectionInfo[testServer]["gsd"] = {"topCatalog" : "thredds/modelsHrrr.xml"}
 
     return gribFeatureCollectionInfo
 
