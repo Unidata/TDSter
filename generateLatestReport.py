@@ -18,11 +18,13 @@ def testLatestTimeByName(catDataset):
     global latestUrlReport
 
     if catDataset.resolverUrl is not None:
-        fileName = catDataset.urlPath
-        latestUrlReport[catDataset.name] = catDataset.accessUrls
-        fullTime = fileName.split("_")
-        fileDate = fullTime[-2]
-        fileTime = fullTime[-1].split('.')[0]
+      fileName = catDataset.urlPath
+      latestUrlReport[catDataset.name] = catDataset.accessUrls
+      fullTime = fileName.split("_")
+      fileDate = fullTime[-2]
+      fileTime = fullTime[-1].split('.')[0]
+      if not "LambertConformal" in fileDate:
+        print fileDate, fileTime
         initTime = parser.parse(fileDate + fileTime).replace(tzinfo=pytz.UTC)
         currentTime = dt.datetime.utcnow().replace(tzinfo=pytz.UTC)
         #timeDiff = dateutil.relativedelta.relativedelta(currentTime, initTime)

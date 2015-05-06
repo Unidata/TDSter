@@ -4,6 +4,7 @@ from helpers.fileName_helper import getOutFilePath
 from helpers.http_helper import basic_http_request
 import json
 import io
+import datetime as dt
 
 outFilePath = ""
 testing = False
@@ -23,6 +24,7 @@ def scrapeServerInfo(testServer):
     jsonDataDict["name"] = serverInfo[0]
     jsonDataDict["version"] = serverInfo[1]
     jsonDataDict["buildDate"] = serverInfo[2]
+    jsonDataDict["lastCheck"] = dt.datetime.now().isoformat()
 
     outFileName =  os.path.join(outFilePath, "serverInfo.json")
     with io.open(outFileName, 'w', encoding='utf-8') as f:

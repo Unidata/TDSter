@@ -19,7 +19,7 @@ def findAndReadConfigFile():
 def createGribFeatureCollectionInfo(testServers):
     gribFeatureCollectionInfo = {}
     for testServer in testServers:
-        if (("thredds.ucar.edu" in testServers) or ("weather.rsmas" in testServers)):
+        if (("thredds.ucar.edu" in testServer) or ("weather.rsmas" in testServer)):
             coreFeatureCollectionInfo = {"ncep" : {"topCatalog" : "thredds/idd/modelsNcep.xml"},
                                          "fnmoc": {"topCatalog" : "thredds/idd/modelsFnmoc.xml"}}
         else:

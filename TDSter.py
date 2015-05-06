@@ -7,6 +7,8 @@
     tests = [testLatestGribFeatureCollections,
              scrapeServerInfo,
              reportStaleDatasets]
+    tests = [testLatestGribFeatureCollections,
+             scrapeServerInfo]
 
     for testServer in tdster_defaults.testServers:
         for tst in tests:

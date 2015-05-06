@@ -12,7 +12,8 @@ outFilePath = ""
 outFileDataPath = ""
 
 def cleanFileName(fileName):
-    fileName = fileName.replace(" ", "")
+    fileName = fileName.replace("-", "_")
+    fileName = fileName.replace(" ", "_")
     fileName = fileName.replace(".","p")
     fileName = fileName.replace("(", "")
     fileName = fileName.replace(")", "")
