@@ -10,8 +10,11 @@
     tests = [testLatestGribFeatureCollections,
              scrapeServerInfo]
 
+    tests = [testLatestGribFeatureCollections,]
+
     for testServer in tdster_defaults.testServers:
         for tst in tests:
+            print("testing {}".format(testServer))
             mainMethod = '.main("{}")'.format(testServer)
             eval(tst.__name__ + mainMethod)
             print("")

@@ -5,6 +5,7 @@ import dateutil.parser, dateutil.relativedelta
 import pytz
 import datetime as dt
 from dateutil import parser
+from xml.etree.ElementTree import ParseError
 
 from helpers.tdster_defaults import defaultTestCatalog
 
@@ -18,6 +19,8 @@ def testLatestTimeByName(catDataset):
     global latestUrlReport
 
     if catDataset.resolverUrl is not None:
+     if "FNMOC" not in catDataset.name:
+
       fileName = catDataset.urlPath
       latestUrlReport[catDataset.name] = catDataset.accessUrls
       fullTime = fileName.split("_")

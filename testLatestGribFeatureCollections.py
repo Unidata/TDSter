@@ -18,7 +18,6 @@ def cleanFileName(fileName):
     fileName = fileName.replace("(", "")
     fileName = fileName.replace(")", "")
     fileName = fileName.lower()
-    fileName = fileName.replace("latestreferencetimecollectionfor", "latest")
 
     return fileName
 
@@ -26,7 +25,6 @@ def testGribFeatureCollections(testServer, collectionName):
     global outFilePath
     global outFileDataPath
     global dateFormat
-
     print("Checking dataset age on {} for the {} collection".format(testServer, collectionName))
 
     scriptRunTime = dt.datetime.strftime(dt.datetime.utcnow(), dateFormat)

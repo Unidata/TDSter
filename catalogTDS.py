@@ -3,7 +3,6 @@ from helpers import basic_http_request
 from helpers.tdster_defaults import defaultTestCatalog
 from string import join
 import urllib2
-
 import sys
 
 class TDSCatalog():
@@ -66,7 +65,13 @@ class Dataset():
             if catalogUrl != "":
                 self.resolved = True
                 self.resolverUrl = self.urlPath
-                self.urlPath = self.resolveUrl(catalogUrl)
+                try:
+                    self.urlPath = self.resolveUrl(catalogUrl)
+                except ET.ParseError:
+                    print self.name
+                    print self.urlPath
+                    self.resolved = False
+                    pass
             else:
                 print "Must pass along the catalog URL to resolve the latest.xml dataset!"
 
@@ -77,6 +82,7 @@ class Dataset():
                 resolverXml = basic_http_request(resolverUrl, return_response = True)
                 tree = ET.parse(resolverXml)
                 root = tree.getroot()
+
                 self.catalog_name = root.attrib["name"]
                 found = False
                 for child in root.iter():
@@ -141,15 +147,16 @@ def fullCatalogInv(url):
                 fullCatalogInv(join([cat.base_tds_url,cat.catalogRefs[ref].href],'/'))
 
 def applyTestFullCatalogInv(url, testFunc = None, datasetKey="latest"):
-        success = False
-        def defaultTestFunc(x):
-            print x.name
-            #for key in x:
-            #    print(key)
+      success = False
+      def defaultTestFunc(x):
+          print x.name
+          #for key in x:
+          #    print(key)
 
-        if testFunc is None:
-            testFunc = defaultTestFunc
+      if testFunc is None:
+          testFunc = defaultTestFunc
 
+      if "FNMOC" not in url:
         try:
             cat = TDSCatalog(url)
             success = True
@@ -170,7 +177,10 @@ def applyTestFullCatalogInv(url, testFunc = None, datasetKey="latest"):
                     testUrl = cat.datasets[name].resolverUrl
 
                 if datasetKey in testUrl:
-                    testFunc(cat.datasets[name])
+                    try:
+                        testFunc(cat.datasets[name])
+                    except ET.ParseError:
+                        pass
 
             if refs != []:
                 for ref in refs:
